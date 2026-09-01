@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Class Participation Tracker</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root{
+    --paper: #F7F6F1;
+    --surface: #FFFFFF;
+    --ink: #26313A;
+    --ink-soft: #5B6B74;
+    --line: #E3E0D6;
+    --brand: #3B6E64;
+    --brand-dark: #2A4F48;
+    --speak: #3B6E64;
+    --home: #4C5B7A;
+    --behave: #A6743A;
+    --hand: #B0524D;
+    --good: #3F8C5F;
+    --mid: #C98A2B;
+    --low: #C0483F;
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:780px;
+    margin:0 auto;
+    padding:28px 18px 80px;
+  }
+  header{margin-bottom:18px;}
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:2rem;
+    margin:0 0 4px;
+    letter-spacing:-0.01em;
+  }
+  .subtitle{
+    color:var(--ink-soft);
+    font-size:0.95rem;
+    margin:0 0 16px;
+  }
+  .weights{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+  }
+  .chip{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:5px 12px 5px 8px;
+    font-size:0.8rem;
+    color:var(--ink-soft);
+  }
+  .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .dot.speak{background:var(--speak);}
+  .dot.home{background:var(--home);}
+  .dot.behave{background:var(--behave);}
+  .dot.hand{background:var(--hand);}
+
+  .datebar{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:12px 14px;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+  .datebar .navbtn{
+    background:var(--paper);
+    border:1px solid var(--line);
+    color:var(--ink);
+    border-radius:8px;
+    width:34px;
+    height:34px;
+    font-size:0.95rem;
+    flex-shrink:0;
+  }
+  .datebar .navbtn:hover{border-color:var(--brand); color:var(--brand);}
+  input[type="date"]{
+    font-family:'Inter', sans-serif;
+    font-size:0.92rem;
+    font-weight:600;
+    padding:8px 10px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  .today-btn{
+    background:none;
+    color:var(--brand);
+    font-size:0.82rem;
+    font-weight:600;
+    padding:6px 4px;
+    border-radius:6px;
+  }
+  .today-btn:hover{text-decoration:underline;}
+  .rec-count{
+    margin-left:auto;
+    color:var(--ink-soft);
+    font-size:0.78rem;
+  }
+
+  .summary{
+    display:flex;
+    gap:14px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px 20px;
+    margin-bottom:18px;
+  }
+  .summary .stat{flex:1;}
+  .summary .stat .num{
+    font-family:'Fraunces', serif;
+    font-size:1.6rem;
+    font-weight:600;
+    line-height:1;
+  }
+  .summary .stat .label{
+    color:var(--ink-soft);
+    font-size:0.78rem;
+    margin-top:4px;
+  }
+
+  .controls{
+    display:flex;
+    gap:8px;
+    margin-bottom:14px;
+  }
+  input[type="text"]{
+    font-family:'Inter', sans-serif;
+    font-size:0.9rem;
+    padding:10px 14px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:var(--surface);
+    color:var(--ink);
+    width:100%;
+  }
+  input[type="text"]:focus{outline:2px solid var(--brand); outline-offset:1px;}
+
+  button{
+    font-family:'Inter', sans-serif;
+    cursor:pointer;
+    border:none;
+  }
+  .btn{
+    background:var(--brand);
+    color:#fff;
+    border-radius:10px;
+    padding:10px 16px;
+    font-size:0.85rem;
+    font-weight:600;
+    white-space:nowrap;
+  }
+  .btn:hover{background:var(--brand-dark);}
+  .btn.ghost{
+    background:var(--surface);
+    color:var(--ink-soft);
+    border:1px solid var(--line);
+  }
+  .btn.ghost:hover{color:var(--ink); border-color:var(--ink-soft);}
+
+  .roster{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .row{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    overflow:hidden;
+  }
+  .row-head{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 14px 2px;
+  }
+  .idx{
+    font-size:0.75rem;
+    color:var(--ink-soft);
+    width:20px;
+    flex-shrink:0;
+    text-align:right;
+  }
+  .name-field{
+    flex:1;
+    border:none;
+    background:transparent;
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:0.92rem;
+    color:var(--ink);
+    padding:4px 0;
+    min-width:0;
+  }
+  .name-field:focus{outline:none; border-bottom:1px solid var(--brand);}
+
+  .stackbar{
+    width:60px;
+    height:8px;
+    border-radius:4px;
+    overflow:hidden;
+    display:flex;
+    flex-shrink:0;
+    background:var(--line);
+  }
+  .stackbar span{height:100%;}
+
+  .total-badge{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:1.05rem;
+    min-width:34px;
+    text-align:right;
+    flex-shrink:0;
+  }
+
+  .row-body{
+    padding:2px 14px 10px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px 14px;
+  }
+
+  .cat{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    padding:4px 0;
+  }
+  .cat-label{
+    width:64px;
+    flex-shrink:0;
+    font-size:0.72rem;
+    color:var(--ink-soft);
+  }
+  .dots{
+    display:flex;
+    gap:4px;
+  }
+  .score-dot{
+    width:23px;
+    height:23px;
+    border-radius:50%;
+    border:1.5px solid var(--line);
+    background:var(--surface);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:0.68rem;
+    color:var(--ink-soft);
+    transition:transform 0.08s ease;
+    padding:0;
+  }
+  .score-dot:hover{transform:scale(1.15);}
+  .cat-pts{
+    margin-left:auto;
+    font-size:0.75rem;
+    color:var(--ink-soft);
+    width:42px;
+    text-align:right;
+    flex-shrink:0;
+  }
+
+  .row-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+    padding:0 14px 8px;
+  }
+  .link-btn{
+    background:none;
+    color:var(--ink-soft);
+    font-size:0.72rem;
+    padding:2px 4px;
+    text-decoration:underline;
+  }
+  .link-btn:hover{color:var(--low);}
+
+  footer{
+    margin-top:22px;
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .empty{
+    text-align:center;
+    color:var(--ink-soft);
+    padding:40px 0;
+    font-size:0.9rem;
+  }
+  .status{
+    font-size:0.75rem;
+    color:var(--ink-soft);
+    text-align:center;
+    margin-top:14px;
+    min-height:16px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Class Participation</h1>
+    <p class="subtitle">Score every category right on the list. Switch the date to score a new day — every day is saved as its own record.</p>
+    <div class="weights">
+      <span class="chip"><span class="dot speak"></span>Speaking English · 20%</span>
+      <span class="chip"><span class="dot home"></span>Homework done · 20%</span>
+      <span class="chip"><span class="dot behave"></span>Good behaviour · 40%</span>
+      <span class="chip"><span class="dot hand"></span>Raising hand · 20%</span>
+    </div>
+  </header>
+
+  <div class="datebar">
+    <button class="navbtn" id="prevDay" title="Previous day">‹</button>
+    <input type="date" id="dateInput">
+    <button class="navbtn" id="nextDay" title="Next day">›</button>
+    <button class="today-btn" id="todayBtn">Today</button>
+    <span class="rec-count" id="recCount"></span>
+  </div>
+
+  <div class="summary">
+    <div class="stat"><div class="num" id="statCount">0</div><div class="label">students</div></div>
+    <div class="stat"><div class="num" id="statAvg">–</div><div class="label">today's average</div></div>
+    <div class="stat"><div class="num" id="statScored">0</div><div class="label">fully scored today</div></div>
+  </div>
+
+  <div class="controls">
+    <input type="text" id="search" placeholder="Search a student…">
+    <button class="btn" id="addBtn">+ Add student</button>
+  </div>
+
+  <div class="roster" id="roster"></div>
+  <div class="empty" id="emptyMsg" style="display:none;">No students yet. Add your first one above.</div>
+
+  <footer>
+    <button class="btn ghost" id="exportDayBtn">Export this day (CSV)</button>
+    <button class="btn ghost" id="exportAllBtn">Export full history (CSV)</button>
+    <button class="btn ghost" id="resetBtn">Clear this day's scores</button>
+  </footer>
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+const WEIGHTS = { speak: 20, home: 20, behave: 40, hand: 20 };
+const CAT_META = {
+  speak: { label: 'Speaking English', short: 'Speaking', color: 'var(--speak)' },
+  home: { label: 'Complete homework', short: 'Homework', color: 'var(--home)' },
+  behave: { label: 'Good behaviour', short: 'Behaviour', color: 'var(--behave)' },
+  hand: { label: 'Raising hand to speak', short: 'Hand up', color: 'var(--hand)' }
+};
+const ROSTER_KEY = 'roster';
+const OLD_KEY = 'class-data'; // previous single-snapshot version, migrated on first run
+
+// Uses Claude's built-in storage when this page is opened inside Claude.
+// Falls back to the browser's own storage automatically when self-hosted,
+// so the same file works either way.
+const hasClaudeStorage = typeof window.storage !== 'undefined' && window.storage;
+const store = {
+  async get(key){
+    if(hasClaudeStorage) return window.storage.get(key, false);
+    const v = localStorage.getItem(key);
+    if(v === null) throw new Error('not found');
+    return { value: v };
+  },
+  async set(key, value){
+    if(hasClaudeStorage) return window.storage.set(key, value, false);
+    localStorage.setItem(key, value);
+    return { key, value };
+  },
+  async list(prefix){
+    if(hasClaudeStorage) return window.storage.list(prefix, false);
+    const keys = [];
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(k && k.startsWith(prefix)) keys.push(k);
+    }
+    return { keys };
+  }
+};
+
+let roster = [];        // [{id, name}]
+let dayScores = {};      // {studentId: {speak,home,behave,hand}} for currentDate
+let currentDate = todayStr();
+let recordedDates = [];  // dates that already have a saved record
+
+function todayStr(){
+  const d = new Date();
+  const off = d.getTimezoneOffset();
+  return new Date(d.getTime() - off*60000).toISOString().slice(0,10);
+}
+
+function dayKey(dateStr){ return 'day:' + dateStr; }
+
+function defaultRoster(n){
+  const arr = [];
+  for(let i=1;i<=n;i++) arr.push({ id: 's'+i, name: 'Student '+i });
+  return arr;
+}
+
+async function saveRoster(){
+  try{ await store.set(ROSTER_KEY, JSON.stringify({ students: roster })); }
+  catch(e){ setStatus('Could not save roster'); }
+}
+
+async function loadRoster(){
+  try{
+    const res = await store.get(ROSTER_KEY);
+    roster = JSON.parse(res.value).students;
+    return;
+  }catch(e){ /* fall through to migration */ }
+
+  try{
+    const old = await store.get(OLD_KEY);
+    const oldData = JSON.parse(old.value);
+    roster = oldData.students.map(s => ({ id: s.id, name: s.name }));
+    await saveRoster();
+    const seed = {};
+    oldData.students.forEach(s => { seed[s.id] = { speak:s.speak, home:s.home, behave:s.behave, hand:s.hand }; });
+    dayScores = seed;
+    await saveDay(currentDate);
+    setStatus('Brought your previous scores in as today\u2019s record');
+    return;
+  }catch(e){ /* no old data either */ }
+
+  roster = defaultRoster(60);
+  await saveRoster();
+}
+
+async function loadDay(dateStr){
+  try{
+    const res = await store.get(dayKey(dateStr));
+    dayScores = JSON.parse(res.value).scores || {};
+  }catch(e){
+    dayScores = {};
+  }
+}
+
+async function saveDay(dateStr){
+  try{ await store.set(dayKey(dateStr), JSON.stringify({ scores: dayScores })); }
+  catch(e){ setStatus('Could not save'); }
+}
+
+async function refreshRecordedDates(){
+  try{
+    const res = await store.list('day:');
+    recordedDates = (res && res.keys ? res.keys : []).map(k => k.slice(4)).sort();
+  }catch(e){ recordedDates = []; }
+  document.getElementById('recCount').textContent =
+    recordedDates.length ? recordedDates.length + ' day' + (recordedDates.length===1?'':'s') + ' recorded so far' : 'No days recorded yet';
+}
+
+function getScore(id, cat){
+  return (dayScores[id] && dayScores[id][cat]) || 0;
+}
+function setScore(id, cat, val){
+  if(!dayScores[id]) dayScores[id] = { speak:0, home:0, behave:0, hand:0 };
+  dayScores[id][cat] = val;
+}
+function studentTotalRaw(id){
+  const s = dayScores[id] || { speak:0, home:0, behave:0, hand:0 };
+  let total = 0;
+  for(const k of Object.keys(WEIGHTS)) total += (s[k]/5) * WEIGHTS[k];
+  return total;
+}
+function computeTotal(id){ return Math.round(studentTotalRaw(id)); }
+function anyScored(id){
+  const s = dayScores[id];
+  return !!s && (s.speak+s.home+s.behave+s.hand > 0);
+}
+function fullyScored(id){
+  const s = dayScores[id];
+  return !!s && s.speak>0 && s.home>0 && s.behave>0 && s.hand>0;
+}
+
+function scoreColor(total, scored){
+  if(!scored) return 'var(--ink-soft)';
+  if(total >= 80) return 'var(--good)';
+  if(total >= 60) return 'var(--mid)';
+  return 'var(--low)';
+}
+
+function setStatus(msg){
+  document.getElementById('status').textContent = msg;
+  if(msg) setTimeout(()=>{ if(document.getElementById('status').textContent===msg) document.getElementById('status').textContent=''; }, 2200);
+}
+
+function formatDateHuman(dateStr){
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString(undefined, { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+}
+
+function render(){
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const rosterEl = document.getElementById('roster');
+  const list = roster.filter(s => s.name.toLowerCase().includes(q));
+  rosterEl.innerHTML = '';
+  document.getElementById('emptyMsg').style.display = roster.length===0 ? 'block':'none';
+
+  list.forEach((s) => {
+    const realIdx = roster.indexOf(s) + 1;
+    const total = computeTotal(s.id);
+    const scored = anyScored(s.id);
+    const row = document.createElement('div');
+    row.className = 'row';
+
+    const stackSegs = Object.keys(WEIGHTS).map(k=>{
+      const pct = (getScore(s.id,k)/5)*WEIGHTS[k];
+      return `<span style="width:${pct}%;background:${CAT_META[k].color}"></span>`;
+    }).join('');
+
+    row.innerHTML = `
+      <div class="row-head" data-id="${s.id}">
+        <span class="idx">${realIdx}.</span>
+        <input class="name-field" data-id="${s.id}" value="${escapeHtml(s.name)}" />
+        <span class="stackbar">${stackSegs}</span>
+        <span class="total-badge" style="color:${scoreColor(total, scored)}">${scored ? total : '–'}</span>
+      </div>
+      <div class="row-body">
+        ${Object.keys(WEIGHTS).map(k => catRow(s.id, k)).join('')}
+        <div class="row-actions">
+          <button class="link-btn" data-action="clear" data-id="${s.id}">Clear today</button>
+          <button class="link-btn" data-action="remove" data-id="${s.id}">Remove student</button>
+        </div>
+      </div>
+    `;
+    rosterEl.appendChild(row);
+  });
+
+  const scoredIds = roster.filter(s => anyScored(s.id));
+  document.getElementById('statCount').textContent = roster.length;
+  document.getElementById('statAvg').textContent = scoredIds.length
+    ? Math.round(scoredIds.reduce((a,s)=>a+computeTotal(s.id),0) / scoredIds.length)
+    : '–';
+  document.getElementById('statScored').textContent = roster.filter(s => fullyScored(s.id)).length;
+
+  attachRowEvents();
+}
+
+function catRow(id, k){
+  const val = getScore(id, k);
+  const pts = ((val/5)*WEIGHTS[k]).toFixed(1);
+  const dots = [1,2,3,4,5].map(n => `<button class="score-dot" data-id="${id}" data-cat="${k}" data-val="${n}"
+      style="${val >= n ? `background:${CAT_META[k].color};border-color:${CAT_META[k].color};color:#fff;` : ''}">${n}</button>`).join('');
+  return `
+    <div class="cat">
+      <span class="cat-label">${CAT_META[k].short}</span>
+      <span class="dots">${dots}</span>
+      <span class="cat-pts">${pts} pt</span>
+    </div>
+  `;
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function attachRowEvents(){
+  document.querySelectorAll('.name-field').forEach(el=>{
+    el.addEventListener('change', async ()=>{
+      const s = roster.find(s=>s.id===el.dataset.id);
+      s.name = el.value.trim() || s.name;
+      await saveRoster();
+    });
+  });
+  document.querySelectorAll('.score-dot').forEach(el=>{
+    el.addEventListener('click', async ()=>{
+      const id = el.dataset.id, cat = el.dataset.cat, val = parseInt(el.dataset.val);
+      const current = getScore(id, cat);
+      setScore(id, cat, current === val ? val - 1 : val); // click the same dot again to lower by one
+      await saveDay(currentDate);
+      await refreshRecordedDates();
+      render();
+    });
+  });
+  document.querySelectorAll('[data-action="clear"]').forEach(el=>{
+    el.addEventListener('click', async ()=>{
+      dayScores[el.dataset.id] = { speak:0, home:0, behave:0, hand:0 };
+      await saveDay(currentDate);
+      render();
+    });
+  });
+  document.querySelectorAll('[data-action="remove"]').forEach(el=>{
+    el.addEventListener('click', async ()=>{
+      roster = roster.filter(s=>s.id!==el.dataset.id);
+      await saveRoster();
+      render();
+    });
+  });
+}
+
+async function goToDate(dateStr){
+  currentDate = dateStr;
+  document.getElementById('dateInput').value = dateStr;
+  await loadDay(currentDate);
+  render();
+}
+
+document.getElementById('search').addEventListener('input', render);
+
+document.getElementById('addBtn').addEventListener('click', async ()=>{
+  const id = 's' + Date.now();
+  roster.push({ id, name: 'Student ' + (roster.length+1) });
+  await saveRoster();
+  render();
+});
+
+document.getElementById('dateInput').addEventListener('change', async (e)=>{
+  await goToDate(e.target.value);
+});
+document.getElementById('prevDay').addEventListener('click', async ()=>{
+  const d = new Date(currentDate + 'T00:00:00');
+  d.setDate(d.getDate() - 1);
+  await goToDate(d.toISOString().slice(0,10));
+});
+document.getElementById('nextDay').addEventListener('click', async ()=>{
+  const d = new Date(currentDate + 'T00:00:00');
+  d.setDate(d.getDate() + 1);
+  await goToDate(d.toISOString().slice(0,10));
+});
+document.getElementById('todayBtn').addEventListener('click', async ()=>{
+  await goToDate(todayStr());
+});
+
+document.getElementById('resetBtn').addEventListener('click', async ()=>{
+  if(!confirm('Clear every score for ' + formatDateHuman(currentDate) + '? Other days are not affected.')) return;
+  dayScores = {};
+  await saveDay(currentDate);
+  render();
+  setStatus('Cleared scores for this day');
+});
+
+document.getElementById('exportDayBtn').addEventListener('click', ()=>{
+  const rows = [['Date','#','Name','Speaking English (20%)','Homework (20%)','Good behaviour (40%)','Raising hand (20%)','Total /100']];
+  roster.forEach((s,i)=>{
+    const sc = dayScores[s.id] || { speak:0, home:0, behave:0, hand:0 };
+    rows.push([currentDate, i+1, s.name, sc.speak, sc.home, sc.behave, sc.hand, computeTotal(s.id)]);
+  });
+  downloadCsv(rows, `class-participation-${currentDate}.csv`);
+});
+
+document.getElementById('exportAllBtn').addEventListener('click', async ()=>{
+  setStatus('Building full history…');
+  const rows = [['Date','#','Name','Speaking English (20%)','Homework (20%)','Good behaviour (40%)','Raising hand (20%)','Total /100']];
+  for(const date of recordedDates){
+    let scores = {};
+    try{
+      const res = await store.get(dayKey(date));
+      scores = JSON.parse(res.value).scores || {};
+    }catch(e){ continue; }
+    roster.forEach((s,i)=>{
+      const sc = scores[s.id] || { speak:0, home:0, behave:0, hand:0 };
+      const total = Math.round(Object.keys(WEIGHTS).reduce((a,k)=>a+(sc[k]/5)*WEIGHTS[k],0));
+      rows.push([date, i+1, s.name, sc.speak, sc.home, sc.behave, sc.hand, total]);
+    });
+  }
+  downloadCsv(rows, 'class-participation-full-history.csv');
+  setStatus('');
+});
+
+function downloadCsv(rows, filename){
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function init(){
+  document.getElementById('dateInput').value = currentDate;
+  await loadRoster();
+  await loadDay(currentDate);
+  await refreshRecordedDates();
+  render();
+}
+init();
+</script>
+</body>
+</html>
